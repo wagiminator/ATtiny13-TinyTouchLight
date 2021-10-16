@@ -1,7 +1,7 @@
 # TinyTouchLight - Dimmable USB Night Light with Capacitive Touch Control
 TinyTouchLight is a dimmable USB night light with capacitive touch control based on the ATtiny13A. It plugs into any USB charger or power bank.
 
-- Design Files (EasyEDA): 
+- Design Files (EasyEDA): https://easyeda.com/wagiminator/attiny13-tinytouchlight_copy
 
 ![TinyTouchLight_pic3.jpg](https://raw.githubusercontent.com/wagiminator/ATtiny13-TinyTouchLight/main/documentation/TinyTouchLight_pic3.jpg)
 
