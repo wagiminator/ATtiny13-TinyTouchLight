@@ -59,19 +59,19 @@ uint8_t  TC_timer;              // touch timer
 
 // TC get touch pad charge delta
 uint8_t TC_getDelta(void) {	
-	// Precharge touch pad LOW and S/H cap HIGH
+  // Precharge touch pad LOW and S/H cap HIGH
   ADMUX   =  TC_SHC_ADC;              // connect S/H control pin to S/H cap
   PORTB  |=  (1<<TC_SHC_PIN);         // charge S/H cap
   PORTB  &= ~(1<<TC_PAD_PIN);         // prepare discharge touch pad
   DDRB   |=  (1<<TC_PAD_PIN);         // discharge touch pad
   _delay_us(TC_CHARGETIME);           // wait for precharge complete
 
-	// Perform charge sharing between touch pad and S/H cap
+  // Perform charge sharing between touch pad and S/H cap
   DDRB   &= ~(1<<TC_PAD_PIN);         // float pad input (pull up is off)
   ADMUX   =  (1<<ADLAR) | TC_PAD_ADC; // connect touch pad to S/H and ADC
   ADCSRA |=  (1<<ADSC);               // start voltage sampling
   while (!(ADCSRA & (1<<ADIF)));      // wait for sampling complete
-	ADCSRA |= (1<<ADIF);                // clear ADIF
+  ADCSRA |= (1<<ADIF);                // clear ADIF
   uint8_t dat1 = ADCH;                // read sampling result (voltage)
   
   // Precharge touch pad HIGH and S/H cap low
@@ -87,15 +87,15 @@ uint8_t TC_getDelta(void) {
   ADMUX   =  (1<<ADLAR) | TC_PAD_ADC; // connect touch pad to S/H and ADC
   ADCSRA |=  (1<<ADSC);               // start voltage sampling
   while (!(ADCSRA & (1<<ADIF)));      // wait for sampling complete
-	ADCSRA |= (1<<ADIF);                // clear ADIF
+  ADCSRA |= (1<<ADIF);                // clear ADIF
   uint8_t dat2 = ADCH;                // read sampling result (voltage)
 
   // Calculate and return delta
-	return dat2-dat1;
+  return dat2-dat1;
 }
 
 // TC init
-void	TC_init(void) {
+void TC_init(void) {
   ADCSRA   = (1<<ADEN);               // enable ADC, prescaler 2
   DDRB    |= (1<<TC_SHC_PIN);         // set S/H cap control pin as output
   TC_bias  = TC_getDelta()<<8;        // get initial bias

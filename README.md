@@ -19,7 +19,7 @@ It should be noted that C<sub>x</sub> and C<sub>t</sub> are not physical capacit
 ## Component Selection
 The series resistor R<sub>S</sub> is nominally 1kΩ, but it may be increased to higher values to improve the noise immunity of the circuit. The value of R<sub>S</sub> should be increased in steps to find the lowest value that provides adequate noise immunity. Resistance values of up to 100kΩ have proven to be useful in extremely noisy environments. For this application a 47kΩ resistor was chosen.
 
-The value of C<sub>x</sub> should be close to that of the ADC’s internal sample-and-hold capacitor C<sub>S/H</sub> (~14pF). For best performance it is recommended that C<sub>xt</sub> should not be greater than ~60pF. If the sensor electrode is designed as a copper surface on the PCB, then it should be roughly as large as the contact surface of a finger (6-10 mm in diameter if the touchkey sensor is round, or with a 6-10 mm side if the touchkey sensor is square). There shouldn't be any traces on the other side of the PCB. The back side can have a ground plane, but this should not be a solid fill.
+The value of C<sub>x</sub> should be close to that of the ADC’s internal sample-and-hold capacitor C<sub>S/H</sub> (~14pF). For best performance it is recommended that C<sub>x+t</sub> should not be greater than ~60pF. If the sensor electrode is designed as a copper surface on the PCB, then it should be roughly as large as the contact surface of a finger (6-10 mm in diameter if the touchkey sensor is round, or with a 6-10 mm side if the touchkey sensor is square). There shouldn't be any traces on the other side of the PCB. The back side can have a ground plane, but this should not be a solid fill.
 
 ## Sensor Acquisition
 The acquisition method works by sharing charge between the ADC’s internal sample-and-hold capacitor (C<sub>S/H</sub>) and the sense electrode capacitance (C<sub>x</sub>). When the sensor is touched the effective capacitance of the sensor electrode increases and becomes C<sub>x</sub> + C<sub>t</sub>. This affects the amount of charge shared between the capacitors. When pre-charging C<sub>x</sub> and sharing with C<sub>S/H</sub>, charge transferred to C<sub>S/H</sub> increases on touch and ADC input voltage increases. When pre-charging C<sub>S/H</sub> and sharing with C<sub>x</sub>, charge remaining on C<sub>S/H</sub> decreases on touch and ADC input voltage decreases. But the resulting signal from the averaged ADC values increases on touch. If the difference between signal and reference is greater than the user-determined threshold (delta), a touch is reported.
@@ -155,7 +155,7 @@ int main(void) {
 ```
 
 # Compiling and Uploading the Firmware
-Since there is no ICSP header on the board, you have to program the ATtiny before putting it into the IC socket. The [AVR Programmer Adapter](https://github.com/wagiminator/AVR-Programmer/tree/master/AVR_Programmer_Adapter) can help with this.
+Since there is no ICSP header on the board, you have to program the ATtiny either before soldering using an [SOP adapter](https://aliexpress.com/wholesale?SearchText=sop-8+150mil+adapter), or after soldering using an [EEPROM clip](https://aliexpress.com/wholesale?SearchText=sop8+eeprom+programming+clip). The [AVR Programmer Adapter](https://github.com/wagiminator/AVR-Programmer/tree/master/AVR_Programmer_Adapter) can help with this.
 
 ## If using the Arduino IDE
 - Make sure you have installed [MicroCore](https://github.com/MCUdude/MicroCore).
