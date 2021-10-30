@@ -1,32 +1,53 @@
-// TinyTouchLight - Dimmable USB Night Light with Capacitive Touch Control
+// ===================================================================================
+// Project:   TinyTouchLight - Dimmable USB Night Light with Capacitive Touch Control
+// Version:   v1.0
+// Year:      2021
+// Author:    Stefan Wagner
+// Github:    https://github.com/wagiminator
+// EasyEDA:   https://easyeda.com/wagiminator
+// License:   http://creativecommons.org/licenses/by-sa/3.0/
+// ===================================================================================
 //
-//                             +-\/-+
-//           --- A0 (D5) PB5  1|°   |8  Vcc
-// TOUCH SHC --- A3 (D3) PB3  2|    |7  PB2 (D2) A1 --- 
-// TOUCH PAD --- A2 (D4) PB4  3|    |6  PB1 (D1) ------ 
-//                       GND  4|    |5  PB0 (D0) ------ LED PWM
-//                             +----+    
+// Description:
+// ------------
+// TinyTouchLight is a dimmable USB night light with capacitive touch control based on
+// the ATtiny13A. It plugs into any USB charger or power bank.
+// The implementation of the capacitive touch control using charge sharing between the
+// touch pad and the internal ADC sample and hold (S/H) capacitor similar to Atmel's
+// QTouchADC is based on TinyTouchLib by Tim.
 //
+// References:
+// -----------
+// https://github.com/cpldcpu/TinyTouchLib
+// http://ww1.microchip.com/downloads/en/Appnotes/doc8497.pdf
+//
+// Wiring:
+// -------
+//                              +-\/-+
+//           --- RST ADC0 PB5  1|°   |8  Vcc
+// TOUCH SHC ------- ADC3 PB3  2|    |7  PB2 ADC1 -------- 
+// TOUCH PAD ------- ADC2 PB4  3|    |6  PB1 AIN1 OC0B --- 
+//                        GND  4|    |5  PB0 AIN0 OC0A --- LED PWM
+//                              +----+
+//
+// Compilation Settings:
+// ---------------------
 // Controller:  ATtiny13A
 // Core:        MicroCore (https://github.com/MCUdude/MicroCore)
 // Clockspeed:  128 kHz internal
-// BOD:         disabled (to save energy)
+// BOD:         BOD disabled
 // Timing:      Micros disabled
+//
 // Leave the rest on default settings. Don't forget to "Burn bootloader"!
 // No Arduino core functions or libraries are used. Use the makefile if 
 // you want to compile without Arduino IDE.
 //
-// The implementation of the capacitive touch control using charge sharing
-// between the touch pad and the internal ADC sample and hold (S/H) capacitor
-// similar to Atmel's QTouchADC is based on TinyTouchLib by Tim. References:
-// https://github.com/cpldcpu/TinyTouchLib
-// http://ww1.microchip.com/downloads/en/Appnotes/doc8497.pdf
-//
-// 2021 by Stefan Wagner 
-// Project Files (EasyEDA): https://easyeda.com/wagiminator
-// Project Files (Github):  https://github.com/wagiminator
-// License: http://creativecommons.org/licenses/by-sa/3.0/
+// Fuse settings: -U lfuse:w:0x3b:m -U hfuse:w:0xff:m
 
+
+// ===================================================================================
+// Libraries and Definitions
+// ===================================================================================
 
 // Libraries
 #include <avr/io.h>             // for gpio
@@ -39,9 +60,9 @@
 #define TC_SHC_ADC    3         // ADC3 as S/H cap charge/discharge ADC input
 #define TC_PAD_ADC    2         // ADC2 as touch pad sense ADC input
 
-// -----------------------------------------------------------------------------
+// ===================================================================================
 // Touch Control (TC) Implementation (based on TinyTouchLib by Tim)
-// -----------------------------------------------------------------------------
+// ===================================================================================
 
 // TC parameter definitions
 #define TC_THRESHOLD_ON   70    // lower values increase sensitivity (70)
@@ -50,7 +71,7 @@
 #define TC_TIMEOUT        255   // to recover from stuck (255)
 
 // TC return values
-enum {TC_OFF=0,TC_ON,TC_PUSH,TC_RELEASE,TC_FAIL};
+enum {TC_OFF,TC_ON,TC_PUSH,TC_RELEASE,TC_FAIL};
 
 // TC global variables
 uint16_t TC_bias;               // no-touch reference value
@@ -69,9 +90,8 @@ uint8_t TC_getDelta(void) {
   // Perform charge sharing between touch pad and S/H cap
   DDRB   &= ~(1<<TC_PAD_PIN);         // float pad input (pull up is off)
   ADMUX   =  (1<<ADLAR) | TC_PAD_ADC; // connect touch pad to S/H and ADC
-  ADCSRA |=  (1<<ADSC);               // start voltage sampling
-  while (!(ADCSRA & (1<<ADIF)));      // wait for sampling complete
-  ADCSRA |= (1<<ADIF);                // clear ADIF
+  ADCSRA |=  (1<<ADSC)  | (1<<ADIF);  // start voltage sampling
+  while(!(ADCSRA & (1<<ADIF)));       // wait for sampling complete
   uint8_t dat1 = ADCH;                // read sampling result (voltage)
   
   // Precharge touch pad HIGH and S/H cap low
@@ -85,9 +105,8 @@ uint8_t TC_getDelta(void) {
   DDRB   &= ~(1<<TC_PAD_PIN);         // float touch pad input
   PORTB  &= ~(1<<TC_PAD_PIN);         // pull up off
   ADMUX   =  (1<<ADLAR) | TC_PAD_ADC; // connect touch pad to S/H and ADC
-  ADCSRA |=  (1<<ADSC);               // start voltage sampling
-  while (!(ADCSRA & (1<<ADIF)));      // wait for sampling complete
-  ADCSRA |= (1<<ADIF);                // clear ADIF
+  ADCSRA |=  (1<<ADSC)  | (1<<ADIF);  // start voltage sampling
+  while(!(ADCSRA & (1<<ADIF)));       // wait for sampling complete
   uint8_t dat2 = ADCH;                // read sampling result (voltage)
 
   // Calculate and return delta
@@ -105,13 +124,13 @@ void TC_init(void) {
 // TC sense touch pad
 uint8_t TC_sense(void) {
   uint16_t tmp = 0;
-  for (uint8_t i=16; i; i--) {
+  for(uint8_t i=16; i; i--) {
     tmp += TC_getDelta();             // average 16 samples
-    _delay_us(100);
+    _delay_us(100);                   // wait a bit between the samples
   }
   int16_t diff = tmp - (TC_bias>>4);  // difference with bias value
-  if (!TC_touch) {                    // not touched previously?
-    if (diff > TC_THRESHOLD_ON) {     // new touch detected?
+  if(!TC_touch) {                     // not touched previously?
+    if(diff > TC_THRESHOLD_ON) {      // new touch detected?
       TC_touch = 1;                   // set "is touched" flag
       TC_timer = 0;                   // reset touch timer
       return TC_PUSH;                 // return "new push"
@@ -120,11 +139,11 @@ uint8_t TC_sense(void) {
     return TC_OFF;                    // return "still not pushed" 
   }
   else {                              // touched previously?
-    if (diff < TC_THRESHOLD_OFF) {    // touch button released?
+    if(diff < TC_THRESHOLD_OFF) {     // touch button released?
       TC_touch = 0;                   // clear "is touched" flag
       return TC_RELEASE;              // return "touch pad released"
     }
-    if (TC_timer == TC_TIMEOUT) {     // still touched but for too long?
+    if(TC_timer == TC_TIMEOUT) {      // still touched but for too long?
       TC_bias  = TC_getDelta()<<8;    // maybe stuck situation, read new bias
       return TC_FAIL;                 // return "fail"
     }
@@ -133,9 +152,9 @@ uint8_t TC_sense(void) {
   }
 }
 
-// -----------------------------------------------------------------------------
+// ===================================================================================
 // Main Function
-// -----------------------------------------------------------------------------
+// ===================================================================================
 
 // Main function
 int main(void) {
@@ -158,10 +177,10 @@ int main(void) {
     if(sense == TC_PUSH) dir = !dir;  // change fade direction on new push
     if(sense == TC_ON) {              // fade on touch hold
       if(dir) {                       // fade in?
-        if (bright < 196) bright++;   // increase brightness
+        if(bright < 196) bright++;    // increase brightness
       }
       else {                          // fade out?
-        if (bright) bright--;         // decrease brightness
+        if(bright) bright--;          // decrease brightness
       }
     }    
     OCR0A = bright;                   // set brightness (PWM)

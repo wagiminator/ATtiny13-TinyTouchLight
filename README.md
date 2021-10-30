@@ -53,9 +53,8 @@ By setting the touch sense pin (PB4) to INPUT (no pullup) and setting the ADC mu
 ```c
 DDRB   &= ~(1<<TC_PAD_PIN);         // float pad input (pull up is off)
 ADMUX   =  (1<<ADLAR) | TC_PAD_ADC; // connect touch pad to S/H and ADC
-ADCSRA |=  (1<<ADSC);               // start voltage sampling
+ADCSRA |=  (1<<ADSC)  | (1<<ADIF);  // start voltage sampling
 while (!(ADCSRA & (1<<ADIF)));      // wait for sampling complete
-ADCSRA |= (1<<ADIF);                // clear ADIF
 uint8_t dat1 = ADCH;                // read sampling result (voltage)
 ```
 
@@ -81,9 +80,8 @@ By setting the touch sense pin (PB4) to INPUT (no pullup) and setting the ADC mu
 DDRB   &= ~(1<<TC_PAD_PIN);         // float touch pad input
 PORTB  &= ~(1<<TC_PAD_PIN);         // pull up off
 ADMUX   =  (1<<ADLAR) | TC_PAD_ADC; // connect touch pad to S/H and ADC
-ADCSRA |=  (1<<ADSC);               // start voltage sampling
+ADCSRA |=  (1<<ADSC)  | (1<<ADIF);  // start voltage sampling
 while (!(ADCSRA & (1<<ADIF)));      // wait for sampling complete
-ADCSRA |= (1<<ADIF);                // clear ADIF
 uint8_t dat2 = ADCH;                // read sampling result (voltage)
 ```
 
@@ -149,7 +147,7 @@ int main(void) {
       else {                          // fade out?
         if (bright) bright--;         // decrease brightness
       }
-    }    
+    }
     OCR0A = bright;                   // set brightness (PWM)
   }
 }
