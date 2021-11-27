@@ -192,7 +192,7 @@ Since there is no ICSP header on the board, you have to program the ATtiny eithe
 3. [AN2934: Capacitive Touch Sensor Design Guide](http://ww1.microchip.com/downloads/en/Appnotes/Capacitive-Touch-Sensor-Design-Guide-DS00002934-B.pdf)
 4. [ATtiny13A Datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/doc8126.pdf)
 
-![TinyTouchLight_pic1.jpg](https://raw.githubusercontent.com/wagiminator/ATtiny13-TinyTouchLight/main/documentation/TinyTouchLight_pic1.jpg)
+![TinyTouchLight_pic5.jpg](https://raw.githubusercontent.com/wagiminator/ATtiny13-TinyTouchLight/main/documentation/TinyTouchLight_pic5.jpg)
 ![TinyTouchLight_pic2.jpg](https://raw.githubusercontent.com/wagiminator/ATtiny13-TinyTouchLight/main/documentation/TinyTouchLight_pic2.jpg)
 ![TinyTouchLight_pic4.jpg](https://raw.githubusercontent.com/wagiminator/ATtiny13-TinyTouchLight/main/documentation/TinyTouchLight_pic4.jpg)
 
